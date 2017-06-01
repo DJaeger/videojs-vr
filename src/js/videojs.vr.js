@@ -26,10 +26,10 @@
         return obj;
     },
 
-    projections = ["360", "360_LR", "360_TB", "360_CUBE", "NONE"],
+    projections = ["Plane", "360", "360_LR", "360_TB", "360_CUBE", "NONE"],
 
     defaults = {
-        projection: "360_LR"
+        projection: "Plane"
     },
 
     /**
@@ -68,7 +68,23 @@
             if (scene) {
                 scene.remove(movieScreen);
             }
-            if (projection === "360") {
+            if (projection === "Plane") {
+				if ((window.innerHeight / 9 * 16) > window.innerWidth) {
+					height = window.innerWidth / 16 * 9;
+					width = window.innerWidth;
+				} else {
+					height = window.innerHeight;
+					width = window.innerHeight / 9 * 16;
+				}
+                movieGeometry = new THREE.PlaneGeometry( width, height, 4, 4 );
+                position.z = -256;
+
+				movieScreen = new THREE.Mesh( movieGeometry, movieMaterial );
+                movieScreen.position.set(position.x, position.y, position.z);
+
+                scene.add(movieScreen);
+
+            } else if (projection === "360") {
                 movieGeometry = new THREE.SphereBufferGeometry( 256, 32, 32 );
 
                 movieScreen = new THREE.Mesh( movieGeometry, movieMaterial );
@@ -276,7 +292,11 @@
             renderedCanvas.style.height = "inherit";
 
             container.insertBefore(renderedCanvas, container.firstChild);
-            videoEl.style.display = "none";
+	        if (current_proj === "Plane") {
+				renderedCanvas.style.display = "none";
+			} else {
+				videoEl.style.display = "none";
+			}
 
             // Handle window resizes
             function onWindowResize() {
